@@ -16,10 +16,8 @@ using Microsoft.VisualStudio.Package;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell.TableManager;
-using Microsoft.VisualStudio.Text.Editor;
-
 using Microsoft.VisualStudio.Shell.TableControl;
-using Microsoft.VisualStudio.Shell.TableManager;
+using Microsoft.VisualStudio.Text.Editor;
 
 namespace CodingWithCalvin.MCPServer.Services;
 
@@ -400,7 +398,7 @@ public class VisualStudioService : IVisualStudioService
 
         var count = 0;
         var searchPoint = textDoc.StartPoint.CreateEditPoint();
-        EditPoint matchEnd = null;
+        EditPoint? matchEnd = null;
 
         while (searchPoint.FindPattern(oldText, (int)vsFindOptions.vsFindOptionsMatchCase, ref matchEnd))
         {
@@ -410,7 +408,7 @@ public class VisualStudioService : IVisualStudioService
 
         if (count > 0)
         {
-            TextRanges tags = null;
+            TextRanges? tags = null;
             textDoc.ReplacePattern(oldText, newText, (int)vsFindOptions.vsFindOptionsMatchCase, ref tags);
         }
 
@@ -1539,7 +1537,7 @@ public class VisualStudioService : IVisualStudioService
             }
 
             // Cast to IErrorList to access the TableControl
-            IErrorList errorList = errorListService as IErrorList;
+            IErrorList? errorList = errorListService as IErrorList;
             if (errorList == null)
             {
                 result.Items.Add(new ErrorItemInfo
@@ -1731,7 +1729,7 @@ public class VisualStudioService : IVisualStudioService
             }
 
             // Find the matching pane by name (works for both well-known and custom panes)
-            EnvDTE.OutputWindowPane targetPane = null;
+            EnvDTE.OutputWindowPane? targetPane = null;
 
             foreach (EnvDTE.OutputWindowPane outputPane in dte.ToolWindows.OutputWindow.OutputWindowPanes)
             {
