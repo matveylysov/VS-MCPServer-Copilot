@@ -214,7 +214,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👥 Contributors
 
 <!-- readme: contributors -start -->
-<a href="https://github.com/CalvinAllen"><img src="https://avatars.githubusercontent.com/u/41448698?v=4&s=64" width="64" height="64" alt="CalvinAllen"></a> <a href="https://github.com/Gh61"><img src="https://avatars.githubusercontent.com/u/10837736?v=4&s=64" width="64" height="64" alt="Gh61"></a> <a href="https://github.com/shaiku"><img src="https://avatars.githubusercontent.com/u/16620522?v=4&s=64" width="64" height="64" alt="shaiku"></a> 
+<a href="https://github.com/CalvinAllen"><img src="https://avatars.githubusercontent.com/u/41448698?v=4&s=64" width="64" height="64" alt="CalvinAllen"></a> <a href="https://github.com/Gh61"><img src="https://avatars.githubusercontent.com/u/10837736?v=4&s=64" width="64" height="64" alt="Gh61"></a> <a href="https://github.com/laviRZ"><img src="https://avatars.githubusercontent.com/u/29277997?v=4&s=64" width="64" height="64" alt="laviRZ"></a> <a href="https://github.com/shaiku"><img src="https://avatars.githubusercontent.com/u/16620522?v=4&s=64" width="64" height="64" alt="shaiku"></a> 
 <!-- readme: contributors -end -->
 
 ---
