@@ -2,7 +2,10 @@ using System;
 using System.ComponentModel.Design;
 using System.Linq;
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Forms;
 using CodingWithCalvin.MCPServer.Services;
+using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
@@ -11,6 +14,8 @@ namespace CodingWithCalvin.MCPServer.Commands;
 
 internal sealed class ServerCommands
 {
+    private const int SubmitCopilotMessageCommandId = 0x0106;
+
     public static async Task InitializeAsync(AsyncPackage package)
     {
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -49,6 +54,16 @@ internal sealed class ServerCommands
         var showToolsCommand = new OleMenuCommand(OnShowTools, showToolsCommandId);
         showToolsCommand.BeforeQueryStatus += OnBeforeQueryStatusStop;
         commandService.AddCommand(showToolsCommand);
+
+        // Open GitHub Copilot pane command
+        var openGitHubCopilotCommandId = new CommandID(VSCommandTableVsct.guidMCPServerPackageCmdSet.Guid, VSCommandTableVsct.guidMCPServerPackageCmdSet.cmdidOpenGitHubCopilot);
+        var openGitHubCopilotCommand = new OleMenuCommand(OnOpenGitHubCopilot, openGitHubCopilotCommandId);
+        commandService.AddCommand(openGitHubCopilotCommand);
+
+        // Submit Copilot message command
+        var submitCopilotMessageCommandId = new CommandID(VSCommandTableVsct.guidMCPServerPackageCmdSet.Guid, SubmitCopilotMessageCommandId);
+        var submitCopilotMessageCommand = new OleMenuCommand(OnSubmitCopilotMessage, submitCopilotMessageCommandId);
+        commandService.AddCommand(submitCopilotMessageCommand);
     }
 
     private static void EnsureServicesInitialized()
@@ -145,7 +160,7 @@ internal sealed class ServerCommands
     {
         var port = MCPServerPackage.Settings?.Port ?? 5050;
         var url = $"http://localhost:{port}/sse";
-        Clipboard.SetText(url);
+        System.Windows.Clipboard.SetText(url);
     }
 
     private static void OnShowTools(object sender, EventArgs e)
@@ -187,4 +202,128 @@ internal sealed class ServerCommands
                 OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
         });
     }
+
+    //Alt+Q - add current file to Copilot chat context. It also opens the chat - !!!
+    //Alt+E - View.GitHub.Copilot.Chat - open GitHub Copilot Chat pane
+    //Alt+Y - View.OpenChatVindow - also opens GitHub Copilot chat
+    //Alt+N - GitHub.Copilot.Chat.NwwThread - Creates new thread (chat) - should focus GitHub Copilot Chat
+    //Ctrl+PgUp - GitHub.Copilot.Chat.NextThread - focuses next thread in GitHub Copilot Chat
+    //Ctrl.PgDown - GitHub.Copilot.Chat.PreviousThread - focuses previous thread in GitHub Copilot Chat
+
+    private static void OnOpenGitHubCopilot(object sender, EventArgs e)
+    {
+        ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            if (MCPServerPackage.Instance == null)
+            {
+                return;
+            }
+
+            SendKeys.SendWait("^\\");
+            SendKeys.SendWait("^{c}");
+        });
+    }
+
+    private static void OnSubmitCopilotMessage(object sender, EventArgs e)
+    {
+        ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            if (MCPServerPackage.Instance == null)
+            {
+                return;
+            }
+
+            var message = "Hello there";
+
+            var copilotWindow = await EnsureCopilotChatLoadedOrThrowAsync();
+
+            var askCopilotTextBox = copilotWindow.FindFirst(
+                TreeScope.Descendants,
+                new AndCondition(
+                    new PropertyCondition(AutomationElement.NameProperty, "Ask Copilot"),
+                    new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Edit)));
+
+            if (askCopilotTextBox == null)
+            {
+                throw new InvalidOperationException("Ask Copilot textbox was not found after GitHub Copilot Chat loaded.");
+            }
+
+            if (askCopilotTextBox.TryGetCurrentPattern(ValuePattern.Pattern, out var valuePatternObject) && valuePatternObject is ValuePattern valuePattern)
+            {
+                valuePattern.SetValue(message);
+            }
+            else
+            {
+                askCopilotTextBox.SetFocus();
+                SendKeys.SendWait(message);
+            }
+
+            var sendButton = copilotWindow.FindFirst(
+                TreeScope.Descendants,
+                new AndCondition(
+                    new PropertyCondition(AutomationElement.NameProperty, "Send"),
+                    new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Button)));
+            if (sendButton == null)
+            {
+                throw new InvalidOperationException("Send button was not found after GitHub Copilot Chat loaded.");
+            }
+
+            if (sendButton.TryGetCurrentPattern(InvokePattern.Pattern, out var invokePatternObject) && invokePatternObject is InvokePattern invokePattern)
+            {
+                invokePattern.Invoke();
+                return;
+            }
+        });
+    }
+
+    private static async System.Threading.Tasks.Task<AutomationElement> EnsureCopilotChatLoadedOrThrowAsync()
+    {
+        const int timeoutMs = 20000;
+
+        var mainWindowHandle = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+        if (mainWindowHandle == IntPtr.Zero)
+        {
+            throw new InvalidOperationException("Could not get main Visual Studio window handle.");
+        }
+
+        var mainWindow = AutomationElement.FromHandle(mainWindowHandle);
+        if (mainWindow == null)
+        {
+            throw new InvalidOperationException("Could not access main Visual Studio window automation element.");
+        }
+
+        var timeoutAt = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+
+        while (DateTime.UtcNow < timeoutAt)
+        {
+            var copilotWindow = mainWindow.FindFirst(
+                TreeScope.Descendants,
+                new AndCondition(
+                    new PropertyCondition(AutomationElement.NameProperty, "GitHub Copilot Chat"),
+                    new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Pane)));
+
+            if (copilotWindow != null)
+            {
+                var askCopilotTextBox = copilotWindow.FindFirst(
+                    TreeScope.Descendants,
+                    new AndCondition(
+                        new PropertyCondition(AutomationElement.NameProperty, "Ask Copilot"),
+                        new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Edit)));
+
+                if (askCopilotTextBox != null)
+                {
+                    return copilotWindow;
+                }
+            }
+
+            await Task.Delay(100);
+        }
+
+        throw new TimeoutException("GitHub Copilot Chat window was not loaded within 10 seconds.");
+    }
+
 }

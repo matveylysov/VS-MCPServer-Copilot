@@ -15,6 +15,9 @@
       <Group guid="guidMCPServerPackageCmdSet" id="MCPServerSettingsGroup" priority="0x0800">
         <Parent guid="guidMCPServerPackageCmdSet" id="MCPServerMenu"/>
       </Group>
+      <Group guid="guidMCPServerPackageCmdSet" id="MCPServerAutomationGroup" priority="0x0100">
+        <Parent guid="guidMCPServerPackageCmdSet" id="MCPServerAutomationMenu"/>
+      </Group>
     </Groups>
 
     <Menus>
@@ -24,6 +27,14 @@
           <ButtonText>MCP Server</ButtonText>
           <CanonicalName>MCPServer</CanonicalName>
           <LocCanonicalName>MCPServer</LocCanonicalName>
+        </Strings>
+      </Menu>
+      <Menu guid="guidMCPServerPackageCmdSet" id="MCPServerAutomationMenu" priority="0x0900" type="Menu">
+        <Parent guid="guidMCPServerPackageCmdSet" id="MCPServerSettingsGroup"/>
+        <Strings>
+          <ButtonText>Automation</ButtonText>
+          <CanonicalName>MCPServer.Automation</CanonicalName>
+          <LocCanonicalName>MCPServer.Automation</LocCanonicalName>
         </Strings>
       </Menu>
     </Menus>
@@ -69,6 +80,22 @@
           <LocCanonicalName>MCPServer.ShowTools</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="guidMCPServerPackageCmdSet" id="cmdidOpenGitHubCopilot" priority="0x0600" type="Button">
+        <Parent guid="guidMCPServerPackageCmdSet" id="MCPServerAutomationGroup"/>
+        <Strings>
+          <ButtonText>Open Copilot Chat</ButtonText>
+          <CanonicalName>MCPServer.OpenGitHubCopilot</CanonicalName>
+          <LocCanonicalName>MCPServer.OpenGitHubCopilot</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="guidMCPServerPackageCmdSet" id="cmdidSubmitCopilotMessage" priority="0x0700" type="Button">
+        <Parent guid="guidMCPServerPackageCmdSet" id="MCPServerAutomationGroup"/>
+        <Strings>
+          <ButtonText>Submit Copilot Message</ButtonText>
+          <CanonicalName>MCPServer.SubmitCopilotMessage</CanonicalName>
+          <LocCanonicalName>MCPServer.SubmitCopilotMessage</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
 
@@ -79,11 +106,15 @@
       <IDSymbol name="MCPServerMenuGroup" value="0x1100"/>
       <IDSymbol name="MCPServerCopyGroup" value="0x1200"/>
       <IDSymbol name="MCPServerSettingsGroup" value="0x1300"/>
+      <IDSymbol name="MCPServerAutomationMenu" value="0x1400"/>
+      <IDSymbol name="MCPServerAutomationGroup" value="0x1500"/>
       <IDSymbol name="cmdidStartServer" value="0x0100"/>
       <IDSymbol name="cmdidStopServer" value="0x0101"/>
       <IDSymbol name="cmdidRestartServer" value="0x0102"/>
       <IDSymbol name="cmdidCopyServerUrl" value="0x0103"/>
       <IDSymbol name="cmdidShowTools" value="0x0104"/>
+      <IDSymbol name="cmdidOpenGitHubCopilot" value="0x0105"/>
+      <IDSymbol name="cmdidSubmitCopilotMessage" value="0x0106"/>
     </GuidSymbol>
   </Symbols>
 </CommandTable>
